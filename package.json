@@ -1,0 +1,35 @@
+{
+  "name": "aiko-io",
+  "version": "0.1.0",
+  "description": "Johnny Five IO Plugin module for Aiko Engine for uPy",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest src",
+    "lint": "eslint src/**/*.js",
+    "build": "babel src/index.js --out-file dist/index.js --source-maps"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ajfisher/aiko-io.git"
+  },
+  "keywords": [
+    "johhny-five",
+    "hardware",
+    "micropython",
+    "esp32"
+  ],
+  "author": "Andrew Fisher <ajfisher.td@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ajfisher/aiko-io/issues"
+  },
+  "homepage": "https://github.com/ajfisher/aiko-io#readme",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-jest": "^22.4.3",
+    "babel-preset-env": "^1.7.0",
+    "coveralls": "^3.0.1",
+    "eslint": "^4.19.1",
+    "jest": "^22.4.3"
+  }
+}
