@@ -31,5 +31,9 @@
     "coveralls": "^3.0.1",
     "eslint": "^4.19.1",
     "jest": "^22.4.3"
+  },
+  "dependencies": {
+    "johnny-five": "^0.15.0",
+    "mqtt": "^2.18.0"
   }
 }
