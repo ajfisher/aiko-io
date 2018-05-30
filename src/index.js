@@ -42,7 +42,7 @@ const aikoModule = Symbol('aikoModule');
 // partially hide this so it can't be used to just randomly send messages
 const client = Symbol('client');
 const topic = Symbol('topic');
-
+let log = console.info;
 
 export default class AikoIO extends EventEmitter {
 	constructor (options) {
@@ -52,7 +52,11 @@ export default class AikoIO extends EventEmitter {
 			throw new Error('Options are required');
 		}
 
-		const { enableSerial = false, enableSoftPwm = false, transport = {} } = options;
+		const { enableSerial = false, enableSoftPwm = false, transport = {}, quiet } = options;
+
+        if (quiet) {
+            log = () => {};
+        }
 
 		Object.defineProperties(this, {
 
@@ -290,9 +294,21 @@ export default class AikoIO extends EventEmitter {
     // now implement the Plugin IO interface
 
     pinMode(pin, mode) {
-        //throw new Error("Not implemented");
-        console.warn("Not implemented");
-        console.log(mode);
+        // set the mode of the pin to one of the allowed values.
+        let mode_name = 'unknown';
+
+        for (let key in this.MODES) {
+            if (this.MODES[key] === mode) {
+                mode_name = key;
+            }
+        }
+
+        let msg = `(nb:pin_mode ${pin} ${mode})`;
+
+        this[client].publish(this[topic], msg);
+
+        log(this[topic], msg);
+        log(`AikoIO, set pin ${pin} to mode ${mode}`);
     }
 
     analogRead(pin) {
@@ -300,7 +316,7 @@ export default class AikoIO extends EventEmitter {
     }
 
     analogWrite(pin, value) {
-        console.warn("Not implemented");
+        this.pwmWrite(pin, value);
     }
 
     digitalRead(pin) {
@@ -310,11 +326,12 @@ export default class AikoIO extends EventEmitter {
     digitalWrite(pin, value) {
 
         // send a message over the transport to write to the pin.
-        let msg = "(nb:digital_write " + pin + " " + value + ")";
+        let msg = `(nb:digital_write ${pin} ${value})`;
 
-        console.log(this[topic], msg);
         this[client].publish(this[topic], msg);
 
+        log(this[topic], msg);
+        log(`AikoIO, digital write pin ${pin} to ${value}`);
     }
 
     pwmWrite(pin, value) {
