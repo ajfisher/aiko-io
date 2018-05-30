@@ -39,6 +39,9 @@ const isSerialProcessing = Symbol('isSerialProcessing');
 const isSerialOpen = Symbol('isSerialOpen');
 
 const aikoModule = Symbol('aikoModule');
+// partially hide this so it can't be used to just randomly send messages
+const client = Symbol('client');
+const topic = Symbol('topic');
 
 
 export default class AikoIO extends EventEmitter {
@@ -204,9 +207,16 @@ export default class AikoIO extends EventEmitter {
                 },
 
                 topic: {
+                    // use this as the public value of the topic used
                     enumerable: true,
                     value: transport.topic,
                 },
+                [topic]: {
+                    // this is used for internal purposes so it can keep
+                    // the housekeeping topics a little more tidy.
+                    enumerable: false,
+                    value: transport.topic + "/in",
+                }
             });
         }
 
@@ -235,29 +245,28 @@ export default class AikoIO extends EventEmitter {
 
 			});
 		} else {
-			Object.defineProperties(this, {
+			/**Object.defineProperties(this, {
 
 				SERIAL_PORT_IDs: {
 					enumerable: true,
 					value: Object.freeze({})
 				}
-			});
+			});**/
 		}
 
 
         this.init = () => {
-            console.log("In init", this);
 
             // check transport
             if (this.transport == 'mqtt') {
                 console.log('Attempting connection')
-                this.client = mqtt.connect(this.host);
+                this[client] = mqtt.connect(this.host);
 
-                this.client.on('connect', () => {
+                this[client].on('connect', () => {
                     console.log('we are connected!!!!');
 
                     console.log("Doing subscription", this.topic + "/#");
-                    this.client.subscribe(this.topic + "/#");
+                    this[client].subscribe(this.topic + "/#");
 
                     this[isReady] = true;
                     this.emit('ready');
@@ -265,10 +274,9 @@ export default class AikoIO extends EventEmitter {
                 });
 
                 // refactor this garbage out properly
-                this.client.on('message', function (topic, message) {
+                this[client].on('message', function (topic, message) {
                     // message is Buffer
                     console.log(message.toString())
-                    //client.end()
                 });
             }
             // connect to device
@@ -283,33 +291,34 @@ export default class AikoIO extends EventEmitter {
 
     pinMode(pin, mode) {
         //throw new Error("Not implemented");
+        console.warn("Not implemented");
+        console.log(mode);
     }
 
     analogRead(pin) {
-        throw new Error("Not implemented");
+        console.warn("Not implemented");
     }
 
     analogWrite(pin, value) {
-        throw new Error("Not implemented");
+        console.warn("Not implemented");
     }
 
     digitalRead(pin) {
-        throw new Error("Not implemented");
+        console.warn("Not implemented");
     }
 
     digitalWrite(pin, value) {
 
         // send a message over the transport to write to the pin.
-        const topic = this.topic + "/in";
         let msg = "(nb:digital_write " + pin + " " + value + ")";
 
-        //console.log(topic, msg);
-        this.client.publish(topic, msg);
+        console.log(this[topic], msg);
+        this[client].publish(this[topic], msg);
 
     }
 
     pwmWrite(pin, value) {
-        throw new Error("Not implemented");
+        console.warn("Not implemented");
     }
 }
 
