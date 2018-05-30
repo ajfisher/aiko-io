@@ -3,7 +3,7 @@
  */
 
 import { EventEmitter } from 'events';
-
+import { ESP32 } from './map.js';
 
 import mqtt from 'mqtt';
 
@@ -157,7 +157,7 @@ export default class AikoIO extends EventEmitter {
 				value: 0
 			},
 
-			[serialQueue]: {
+/**			[serialQueue]: {
 				value: []
 			},
 
@@ -169,7 +169,7 @@ export default class AikoIO extends EventEmitter {
 			[isSerialOpen]: {
 				writable: true,
 				value: false
-			},
+			},**/
 
 			MODES: {
 				enumerable: true,
@@ -261,6 +261,10 @@ export default class AikoIO extends EventEmitter {
 
         this.init = () => {
 
+            // set up the pin mappings
+            let pin_mapping = ESP32;
+            console.log(pin_mapping);
+
             // check transport
             if (this.transport == 'mqtt') {
                 console.log('Attempting connection')
@@ -283,9 +287,6 @@ export default class AikoIO extends EventEmitter {
                     console.log(message.toString())
                 });
             }
-            // connect to device
-            // when connected issue ready
-            // idf error throw error;.
         };
 
         this.init();
