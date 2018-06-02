@@ -45,26 +45,26 @@ const topic = Symbol('topic');
 let log = console.info;
 
 export default class AikoIO extends EventEmitter {
-	constructor (options) {
-		super();
+  constructor(options) {
+    super();
 
-		if (!options) {
-			throw new Error('Options are required');
-		}
+    if (!options) {
+      throw new Error('Options are required');
+    }
 
-		const { enableSerial = false, enableSoftPwm = false, transport = {}, quiet } = options;
+    const { enableSerial = false, enableSoftPwm = false, transport = {}, quiet } = options;
 
-        if (quiet) {
-            log = () => {};
-        }
+    if (quiet) {
+      log = () => {};
+    }
 
-		Object.defineProperties(this, {
+    Object.defineProperties(this, {
 
-			[aikoModule]: {
-				writable: true,
-				value: 'aiko'
-			},
-/**			[raspiBoardModule]: {
+      [aikoModule]: {
+        writable: true,
+        value: 'aiko'
+      }
+      /**			[raspiBoardModule]: {
 				writable: true,
 				value: platform['raspi-board']
 			},
@@ -99,65 +99,65 @@ export default class AikoIO extends EventEmitter {
 				value: platform['raspi-soft-pwm']
 			}**/
 
-		});
+    });
 
-		Object.defineProperties(this, {
+    Object.defineProperties(this, {
 
-			name: {
-				enumerable: true,
-				value: 'Aiko32-IO'
-			},
+      name: {
+        enumerable: true,
+        value: 'Aiko32-IO'
+      },
 
-			[instances]: {
-				writable: true,
-				value: []
-			},
+      [instances]: {
+        writable: true,
+        value: []
+      },
 
-			[isReady]: {
-				writable: true,
-				value: false
-			},
-			isReady: {
-				enumerable: true,
-				get() {
-					return this[isReady];
-				}
-			},
+      [isReady]: {
+        writable: true,
+        value: false
+      },
+      isReady: {
+        enumerable: true,
+        get() {
+          return this[isReady];
+        }
+      },
 
-			[pins]: {
-				writable: true,
-				value: []
-			},
-			pins: {
-				enumerable: true,
-				get() {
-					return this[pins];
-				}
-			},
+      [pins]: {
+        writable: true,
+        value: []
+      },
+      pins: {
+        enumerable: true,
+        get() {
+          return this[pins];
+        }
+      },
 
-			[analogPins]: {
-				writable: true,
-				value: []
-			},
-			analogPins: {
-				enumerable: true,
-				get() {
-					return this[analogPins];
-				}
-			},
+      [analogPins]: {
+        writable: true,
+        value: []
+      },
+      analogPins: {
+        enumerable: true,
+        get() {
+          return this[analogPins];
+        }
+      },
 
-			[i2c]: {
-				writable: true,
-				//value: new this[raspiI2cModule].I2C()
-                value: 0
-			},
+      [i2c]: {
+        writable: true,
+        // value: new this[raspiI2cModule].I2C()
+        value: 0
+      },
 
-			[i2cDelay]: {
-				writable: true,
-				value: 0
-			},
+      [i2cDelay]: {
+        writable: true,
+        value: 0
+      },
 
-/**			[serialQueue]: {
+      /**			[serialQueue]: {
 				value: []
 			},
 
@@ -171,65 +171,65 @@ export default class AikoIO extends EventEmitter {
 				value: false
 			},**/
 
-			MODES: {
-				enumerable: true,
-				value: Object.freeze({
-					INPUT: INPUT_MODE,
-					OUTPUT: OUTPUT_MODE,
-					ANALOG: ANALOG_MODE,
-					PWM: PWM_MODE,
-					SERVO: SERVO_MODE
-				})
-			},
+      MODES: {
+        enumerable: true,
+        value: Object.freeze({
+          INPUT: INPUT_MODE,
+          OUTPUT: OUTPUT_MODE,
+          ANALOG: ANALOG_MODE,
+          PWM: PWM_MODE,
+          SERVO: SERVO_MODE
+        })
+      },
 
-			HIGH: {
-				enumerable: true,
-				value: HIGH
-			},
-			LOW: {
-				enumerable: true,
-				value: LOW
-			},
+      HIGH: {
+        enumerable: true,
+        value: HIGH
+      },
+      LOW: {
+        enumerable: true,
+        value: LOW
+      },
 
-			defaultLed: {
-				enumerable: true,
-				value: LED_PIN
-			}
-		});
+      defaultLed: {
+        enumerable: true,
+        value: LED_PIN
+      }
+    });
 
-        if (transport) {
-            Object.defineProperties(this, {
+    if (transport) {
+      Object.defineProperties(this, {
 
-                transport: {
-                    enumerable: true,
-                    value: transport.type,
-                },
+        transport: {
+          enumerable: true,
+          value: transport.type
+        },
 
-                host: {
-                    enumerable: true,
-                    value: transport.host,
-                },
+        host: {
+          enumerable: true,
+          value: transport.host
+        },
 
-                topic: {
-                    // use this as the public value of the topic used
-                    enumerable: true,
-                    value: transport.topic,
-                },
-                [topic]: {
-                    // this is used for internal purposes so it can keep
-                    // the housekeeping topics a little more tidy.
-                    enumerable: false,
-                    value: transport.topic + "/in",
-                }
-            });
+        topic: {
+          // use this as the public value of the topic used
+          enumerable: true,
+          value: transport.topic
+        },
+        [topic]: {
+          // this is used for internal purposes so it can keep
+          // the housekeeping topics a little more tidy.
+          enumerable: false,
+          value: transport.topic + '/in'
         }
+      });
+    }
 
-        console.log("After transport", this);
+    console.log('After transport', this);
 
-		if (enableSerial) {
-			Object.defineProperties(this, {
+    if (enableSerial) {
+      Object.defineProperties(this, {
 
-				/**        [raspiSerialModule]: {
+        /**        [raspiSerialModule]: {
 		  writable: true,
 		  value: platform['raspi-serial']
 		},
@@ -247,118 +247,113 @@ export default class AikoIO extends EventEmitter {
 		  })
 		}**/
 
-			});
-		} else {
-			/**Object.defineProperties(this, {
+      });
+    } else {
+      /** Object.defineProperties(this, {
 
 				SERIAL_PORT_IDs: {
 					enumerable: true,
 					value: Object.freeze({})
 				}
 			});**/
-		}
+    }
 
 
-        this.init = () => {
+    this.init = () => {
+      // set up the pin mappings
+      const pin_mapping = ESP32;
+      this[pins] = [];
 
-            // set up the pin mappings
-            let pin_mapping = ESP32;
-            this[pins] = [];
+      Object.keys(pin_mapping).forEach((pin) => {
+        console.log(pin);
+        const pin_info = pin_mapping[pin];
+        const supported_modes = [];
 
-            Object.keys(pin_mapping).forEach((pin) => {
-                console.log(pin);
-                const pin_info = pin_mapping[pin];
-                let supported_modes = [];
-
-                if (pin_info.peripherals.indexOf('gpio') != -1) {
-                    supported_modes.push(INPUT_MODE, OUTPUT_MODE);
-                }
-                if (pin_info.peripherals.indexOf('pwm') != -1) {
-                    supported_modes.push(PWM_MODE, SERVO_MODE);
-                }
-                if (pin_info.peripherals.indexOf('adc') != -1) {
-                    supported_modes.push(ANALOG_MODE);
-                }
-
-                //const instance = this[instances][pin] = {
-
-            });
-
-            // check transport
-            if (this.transport == 'mqtt') {
-                console.log('Attempting connection')
-                this[client] = mqtt.connect(this.host);
-
-                this[client].on('connect', () => {
-                    console.log('we are connected!!!!');
-
-                    console.log("Doing subscription", this.topic + "/#");
-                    this[client].subscribe(this.topic + "/#");
-
-                    this[isReady] = true;
-                    this.emit('ready');
-                    this.emit('connect');
-                });
-
-                // refactor this garbage out properly
-                this[client].on('message', function (topic, message) {
-                    // message is Buffer
-                    console.log(message.toString())
-                });
-            }
-        };
-
-        this.init();
-	}
-
-    // now implement the Plugin IO interface
-
-    pinMode(pin, mode) {
-        // set the mode of the pin to one of the allowed values.
-        let mode_name = 'unknown';
-
-        for (let key in this.MODES) {
-            if (this.MODES[key] === mode) {
-                mode_name = key;
-            }
+        if (pin_info.peripherals.indexOf('gpio') != -1) {
+          supported_modes.push(INPUT_MODE, OUTPUT_MODE);
+        }
+        if (pin_info.peripherals.indexOf('pwm') != -1) {
+          supported_modes.push(PWM_MODE, SERVO_MODE);
+        }
+        if (pin_info.peripherals.indexOf('adc') != -1) {
+          supported_modes.push(ANALOG_MODE);
         }
 
-        let msg = `(nb:pin_mode ${pin} ${mode})`;
+        // const instance = this[instances][pin] = {
+      });
 
-        this[client].publish(this[topic], msg);
+      // check transport
+      if (this.transport == 'mqtt') {
+        console.log('Attempting connection')
+        this[client] = mqtt.connect(this.host);
 
-        log(this[topic], msg);
-        log(`AikoIO, set pin ${pin} to mode ${mode}`);
+        this[client].on('connect', () => {
+          console.log('we are connected!!!!');
+
+          console.log('Doing subscription', this.topic + '/#');
+          this[client].subscribe(this.topic + '/#');
+
+          this[isReady] = true;
+          this.emit('ready');
+          this.emit('connect');
+        });
+
+        // refactor this garbage out properly
+        this[client].on('message', function(topic, message) {
+          // message is Buffer
+          console.log(message.toString())
+        });
+      }
+    };
+
+    this.init();
+  }
+
+  // now implement the Plugin IO interface
+
+  pinMode(pin, mode) {
+    // set the mode of the pin to one of the allowed values.
+    let mode_name = 'unknown';
+
+    for (const key in this.MODES) {
+      if (this.MODES[key] === mode) {
+        mode_name = key;
+      }
     }
 
-    analogRead(pin) {
-        console.warn("Not implemented");
-    }
+    const msg = `(nb:pin_mode ${pin} ${mode})`;
 
-    analogWrite(pin, value) {
-        this.pwmWrite(pin, value);
-    }
+    this[client].publish(this[topic], msg);
 
-    digitalRead(pin) {
-        console.warn("Not implemented");
-    }
+    log(this[topic], msg);
+    log(`AikoIO, set pin ${pin} to mode ${mode}`);
+  }
 
-    digitalWrite(pin, value) {
+  analogRead(pin) {
+    console.warn('Not implemented');
+  }
 
-        // send a message over the transport to write to the pin.
-        let msg = `(nb:digital_write ${pin} ${value})`;
+  analogWrite(pin, value) {
+    this.pwmWrite(pin, value);
+  }
 
-        this[client].publish(this[topic], msg);
+  digitalRead(pin) {
+    console.warn('Not implemented');
+  }
 
-        log(this[topic], msg);
-        log(`AikoIO, digital write pin ${pin} to ${value}`);
-    }
+  digitalWrite(pin, value) {
+    // send a message over the transport to write to the pin.
+    const msg = `(nb:digital_write ${pin} ${value})`;
 
-    pwmWrite(pin, value) {
-        console.warn("Not implemented");
-    }
+    this[client].publish(this[topic], msg);
+
+    log(this[topic], msg);
+    log(`AikoIO, digital write pin ${pin} to ${value}`);
+  }
+
+  pwmWrite(pin, value) {
+    console.warn('Not implemented');
+  }
 }
-
-
 
 
