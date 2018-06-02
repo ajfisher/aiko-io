@@ -2,11 +2,19 @@
   "name": "aiko-io",
   "version": "0.1.0",
   "description": "Johnny Five IO Plugin module for Aiko Engine for uPy",
-  "main": "index.js",
+  "main": "./dist/index.js",
+  "files": [
+      "dist", "examples"
+  ],
   "scripts": {
-    "test": "jest src",
+    "build": "babel src -d dist --ignore *.test.js",
+    "clean": "rm -rf dist",
+    "init": "mkdir dist",
+    "j5": "babel-node examples/j5.js",
     "lint": "eslint src/**/*.js",
-    "build": "babel src/index.js --out-file dist/index.js --source-maps"
+    "test": "jest src",
+    "prebuild": "npm run clean && npm run init",
+    "pretest": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -30,10 +38,10 @@
     "babel-preset-env": "^1.7.0",
     "coveralls": "^3.0.1",
     "eslint": "^4.19.1",
-    "jest": "^22.4.3"
+    "jest": "^22.4.3",
+    "johnny-five": "^0.15.0"
   },
   "dependencies": {
-    "johnny-five": "^0.15.0",
     "mqtt": "^2.18.0"
   }
 }
