@@ -299,9 +299,9 @@ export default class AikoIO extends EventEmitter {
         });
 
         // refactor this garbage out properly
-        this[client].on('message', function(topic, message) {
+        this[client].on('message', function(t, msg) {
           // message is Buffer
-          console.log(message.toString())
+          console.log(msg.toString())
         });
       }
     };
