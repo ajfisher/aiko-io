@@ -279,9 +279,42 @@ export default class AikoIO extends EventEmitter {
           supported_modes.push(ANALOG_MODE);
         }
 
-        // const instance = this[instances][pin] = {
+        const instance = this[instances][pin] = {
+          peripheral: null,
+          mode: supported_modes.indexOf(OUTPUT_MODE) == -1 ? UNKNOWN_MODE : OUTPUT_MODE,
+
+          // cache the previously written value
+          previous_written_value: undefined,
+          previous_read_value: undefined
+        }
+        console.log(instance);
+
+        this[pins][pin] = Object.create(null, {
+          supportedModes: {
+            enumerable: true,
+            value: Object.freeze(supported_modes)
+          },
+          mode: {
+            enumerable: true,
+            get() {
+              return instance.mode;
+            }
+          },
+          value: {
+            enumerable: true,
+            get() {
+              return 'not yet implemented';
+            },
+            set(value) {
+              if (instance.mode == OUTPUT_MODE) {
+                instance.peripheral.write(value);
+              }
+            }
+          }
+        });
       });
 
+      console.log(this[pins]);
       // check transport
       if (this.transport == 'mqtt') {
         console.log('Attempting connection')
@@ -298,7 +331,7 @@ export default class AikoIO extends EventEmitter {
           this.emit('connect');
         });
 
-        // refactor this garbage out properly
+        // TODO refactor this garbage out properly
         this[client].on('message', function(t, msg) {
           // message is Buffer
           console.log(msg.toString())
@@ -334,7 +367,8 @@ export default class AikoIO extends EventEmitter {
   }
 
   analogWrite(pin, value) {
-    this.pwmWrite(pin, value);
+    // this.pwmWrite(pin, value);
+    console.warn('Not implemented');
   }
 
   digitalRead(pin) {
