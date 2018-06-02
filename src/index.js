@@ -263,7 +263,26 @@ export default class AikoIO extends EventEmitter {
 
             // set up the pin mappings
             let pin_mapping = ESP32;
-            console.log(pin_mapping);
+            this[pins] = [];
+
+            Object.keys(pin_mapping).forEach((pin) => {
+                console.log(pin);
+                const pin_info = pin_mapping[pin];
+                let supported_modes = [];
+
+                if (pin_info.peripherals.indexOf('gpio') != -1) {
+                    supported_modes.push(INPUT_MODE, OUTPUT_MODE);
+                }
+                if (pin_info.peripherals.indexOf('pwm') != -1) {
+                    supported_modes.push(PWM_MODE, SERVO_MODE);
+                }
+                if (pin_info.peripherals.indexOf('adc') != -1) {
+                    supported_modes.push(ANALOG_MODE);
+                }
+
+                //const instance = this[instances][pin] = {
+
+            });
 
             // check transport
             if (this.transport == 'mqtt') {
