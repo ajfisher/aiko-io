@@ -198,6 +198,20 @@ export default class AikoIO extends EventEmitter {
     });
 
     if (transport) {
+      if (typeof(transport.type) == 'undefined') {
+        throw new Error('No transport type defined');
+      } else if (transport.type != 'mqtt') {
+        throw new Error('Only mqtt transport type supported');
+      }
+
+      if (typeof(transport.host) == 'undefined') {
+        throw new Error('No host specified');
+      }
+
+      if (typeof(transport.topic) == 'undefined') {
+        throw new Error('No topic specified');
+      }
+
       Object.defineProperties(this, {
 
         transport: {
@@ -224,7 +238,7 @@ export default class AikoIO extends EventEmitter {
       });
     }
 
-    console.log('After transport', this);
+    // console.log('After transport', this);
 
     if (enableSerial) {
       Object.defineProperties(this, {
@@ -265,7 +279,7 @@ export default class AikoIO extends EventEmitter {
       this[pins] = [];
 
       Object.keys(pin_mapping).forEach((pin) => {
-        console.log(pin);
+        // console.log(pin);
         const pin_info = pin_mapping[pin];
         const supported_modes = [];
 
@@ -287,7 +301,7 @@ export default class AikoIO extends EventEmitter {
           previous_written_value: undefined,
           previous_read_value: undefined
         }
-        console.log(instance);
+        // console.log(instance);
 
         this[pins][pin] = Object.create(null, {
           supportedModes: {
@@ -314,7 +328,7 @@ export default class AikoIO extends EventEmitter {
         });
       });
 
-      console.log(this[pins]);
+      // console.log(this[pins]);
       // check transport
       if (this.transport == 'mqtt') {
         console.log('Attempting connection')
