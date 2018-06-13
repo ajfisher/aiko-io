@@ -31,3 +31,10 @@ test('IO Plugin fails with MQTT transport not specified properly', () => {
     })
   }).toThrow(/Missing protocol/i);
 });
+
+// TODO 
+// Test for pins after construction
+// Implement a mock for the various functions
+// implement pin mode
+// implement digital write
+// test pin normalisation
