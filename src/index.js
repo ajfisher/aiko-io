@@ -303,19 +303,11 @@ export default class AikoIO extends EventEmitter {
       throw new Error(`Pin "${pin}" does not support "${mode_name}" mode`);
     }
 
-    for (const key in this.MODES) {
-      if (this.MODES[key] === mode) {
-        mode_name = key;
-      }
-    }
-
+    // crete and publish the message to the client.
     const msg = `(nb:pin_mode ${pin} ${mode})`;
-
     this[client].publish(this[topic], msg);
 
-    console.log(pin_instance);
-    log(this[topic], msg);
-    log(`AikoIO, set pin ${pin} to mode ${mode}`);
+    log(`AikoIO, set pin ${pin} to mode ${mode} using ${this[topic]}:${msg}`);
   }
 
   analogRead(pin) {
@@ -328,7 +320,7 @@ export default class AikoIO extends EventEmitter {
   }
 
   digitalRead(pin, handler) {
-
+    console.warn('Not implemented');
   }
 
   digitalWrite(pin, value) {
