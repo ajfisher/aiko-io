@@ -17,6 +17,6 @@ const board = five.Board({
 board.on('ready', () => {
   console.log('ready');
 
-  const led = new five.Led({pin: 22});
+  const led = new five.Led({pin: 32});
   led.blink(2000);
 });
