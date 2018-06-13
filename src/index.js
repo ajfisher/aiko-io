@@ -330,7 +330,7 @@ export default class AikoIO extends EventEmitter {
     this[client].publish(this[topic], msg);
 
     log(this[topic], msg);
-    log(`AikoIO, digital write pin ${pin} to ${value}`);
+    log(`AikoIO, digital write pin ${pin} to ${value} using ${this[topic]}:${msg}`);
   }
 
   pwmWrite(pin, value) {
