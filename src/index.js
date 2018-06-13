@@ -31,12 +31,6 @@ const i2cDelay = Symbol('i2cDelay');
 const i2cRead = Symbol('i2cRead');
 const i2cCheckAlive = Symbol('i2cCheckAlive');
 const pinMode = Symbol('pinMode');
-const serial = Symbol('serial');
-const serialQueue = Symbol('serialQueue');
-const addToSerialQueue = Symbol('addToSerialQueue');
-const serialPump = Symbol('serialPump');
-const isSerialProcessing = Symbol('isSerialProcessing');
-const isSerialOpen = Symbol('isSerialOpen');
 
 const aikoModule = Symbol('aikoModule');
 // partially hide this so it can't be used to just randomly send messages
@@ -59,49 +53,10 @@ export default class AikoIO extends EventEmitter {
     }
 
     Object.defineProperties(this, {
-
       [aikoModule]: {
         writable: true,
         value: 'aiko'
-      }
-      /**			[raspiBoardModule]: {
-				writable: true,
-				value: platform['raspi-board']
-			},
-
-			[raspiGpioModule]: {
-				writable: true,
-				value: platform['raspi-gpio']
-			},
-
-			[raspiI2cModule]: {
-				writable: true,
-				value: platform['raspi-i2c']
-			},
-
-			[raspiLedModule]: {
-				writable: true,
-				value: platform['raspi-led']
-			},
-
-			[raspiPwmModule]: {
-				writable: true,
-				value: platform['raspi-pwm']
-			},
-
-			[raspiSerialModule]: {
-				writable: true,
-				value: platform['raspi-serial']
-			},
-
-			[raspiSoftPwmModule]: {
-				writable: true,
-				value: platform['raspi-soft-pwm']
-			}**/
-
-    });
-
-    Object.defineProperties(this, {
+      },
 
       name: {
         enumerable: true,
@@ -156,20 +111,6 @@ export default class AikoIO extends EventEmitter {
         writable: true,
         value: 0
       },
-
-      /**			[serialQueue]: {
-				value: []
-			},
-
-			[isSerialProcessing]: {
-				writable: true,
-				value: false
-			},
-
-			[isSerialOpen]: {
-				writable: true,
-				value: false
-			},**/
 
       MODES: {
         enumerable: true,
@@ -240,39 +181,6 @@ export default class AikoIO extends EventEmitter {
 
     // console.log('After transport', this);
 
-    if (enableSerial) {
-      Object.defineProperties(this, {
-
-        /**        [raspiSerialModule]: {
-		  writable: true,
-		  value: platform['raspi-serial']
-		},
-
-		[serial]: {
-		  writable: true,
-		  value: new this[raspiSerialModule].Serial()
-		},
-
-		SERIAL_PORT_IDs: {
-		  enumerable: true,
-		  value: Object.freeze({
-			HW_SERIAL0: this[raspiSerialModule].DEFAULT_PORT,
-			DEFAULT: this[raspiSerialModule].DEFAULT_PORT
-		  })
-		}**/
-
-      });
-    } else {
-      /** Object.defineProperties(this, {
-
-				SERIAL_PORT_IDs: {
-					enumerable: true,
-					value: Object.freeze({})
-				}
-			});**/
-    }
-
-
     this.init = () => {
       // set up the pin mappings
       const pin_mapping = ESP32;
@@ -317,7 +225,14 @@ export default class AikoIO extends EventEmitter {
           value: {
             enumerable: true,
             get() {
-              return 'not yet implemented';
+              switch (instance.mode) {
+                case INPUT_MODE:
+                  return instance.peripheral.read();
+                case OUTPUT_MODE:
+                  return instance.previous_written_value;
+                default:
+                  return null;
+              }
             },
             set(value) {
               if (instance.mode == OUTPUT_MODE) {
@@ -328,7 +243,7 @@ export default class AikoIO extends EventEmitter {
         });
       });
 
-      // console.log(this[pins]);
+      console.log(this[pins]);
       // check transport
       if (this.transport == 'mqtt') {
         console.log('Attempting connection')
@@ -356,11 +271,37 @@ export default class AikoIO extends EventEmitter {
     this.init();
   }
 
+  [getPinInstance](pin) {
+    // returns the Pin instance based on the pin number supplied
+    const pin_instance = this[instances][pin];
+    if (! pin_instance) {
+      throw new Error(`Unknown pin "${pin}"`);
+    }
+
+    return pin_instance;
+  }
   // now implement the Plugin IO interface
 
   pinMode(pin, mode) {
     // set the mode of the pin to one of the allowed values.
+
+    const pin_instance = this[getPinInstance](pin);
+
     let mode_name = 'unknown';
+
+    // check the available supported modes and see if we can do what we want
+    // to try and do.
+    if (this[pins][pin].supportedModes.indexOf(mode) == -1) {
+      switch (mode) {
+        case INPUT_MODE: mode_name = 'input'; break;
+        case OUTPUT_MODE: mode_name = 'output'; break;
+        case ANALOG_MODE: mode_name = 'analog'; break;
+        case PWM_MODE: mode_name = 'pwm'; break;
+        case SERVO_MODE: mode_name = 'servo'; break;
+        default: mode_name = 'other'; break;
+      }
+      throw new Error(`Pin "${pin}" does not support "${mode_name}" mode`);
+    }
 
     for (const key in this.MODES) {
       if (this.MODES[key] === mode) {
@@ -372,6 +313,7 @@ export default class AikoIO extends EventEmitter {
 
     this[client].publish(this[topic], msg);
 
+    console.log(pin_instance);
     log(this[topic], msg);
     log(`AikoIO, set pin ${pin} to mode ${mode}`);
   }
@@ -385,8 +327,8 @@ export default class AikoIO extends EventEmitter {
     console.warn('Not implemented');
   }
 
-  digitalRead(pin) {
-    console.warn('Not implemented');
+  digitalRead(pin, handler) {
+
   }
 
   digitalWrite(pin, value) {
