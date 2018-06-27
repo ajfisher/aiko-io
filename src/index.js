@@ -4,7 +4,7 @@
 
 import { EventEmitter } from 'events';
 import { ESP32 } from './map.js';
-
+import { DigitalInput, DigitalOutput } from './peripheral.js';
 import mqtt from 'mqtt';
 
 // Constants
@@ -287,10 +287,15 @@ export default class AikoIO extends EventEmitter {
 
     const pin_instance = this[getPinInstance](pin);
 
+    const config = {
+      pin,
+      client: this[client],
+      topic: this[topic]
+    };
     let mode_name = 'unknown';
 
     // check the available supported modes and see if we can do what we want
-    // to try and do.
+    // to try and do. If not return an error with appropriate info in it.
     if (this[pins][pin].supportedModes.indexOf(mode) == -1) {
       switch (mode) {
         case INPUT_MODE: mode_name = 'input'; break;
@@ -303,7 +308,25 @@ export default class AikoIO extends EventEmitter {
       throw new Error(`Pin "${pin}" does not support "${mode_name}" mode`);
     }
 
-    // crete and publish the message to the client.
+    // if we're here we know we can do something with the pin so set it up
+    // as the right type of peripheral.
+    switch (mode) {
+      case INPUT_MODE:
+        break;
+      case OUTPUT_MODE:
+        console.log('Creating output peripheral');
+        pin_instance.peripheral = new DigitalOutput(config);
+        break;
+      case ANALOG_MODE:
+      case PWM_MODE:
+      case SERVO_MODE:
+        log('no peripheral implemented');
+        break;
+      default:
+        log(`Unkown mode ${mode}`);
+    }
+
+    // create and publish the message to the client.
     const msg = `(nb:pin_mode ${pin} ${mode})`;
     this[client].publish(this[topic], msg);
 
@@ -325,12 +348,13 @@ export default class AikoIO extends EventEmitter {
 
   digitalWrite(pin, value) {
     // send a message over the transport to write to the pin.
-    const msg = `(nb:digital_write ${pin} ${value})`;
 
-    this[client].publish(this[topic], msg);
+    const pin_instance = this[getPinInstance](pin);
 
-    log(this[topic], msg);
-    log(`AikoIO, digital write pin ${pin} to ${value} using ${this[topic]}:${msg}`);
+    if (pin_instance.previous_written_value !== value) {
+      pin_instance.peripheral.write(value);
+      pin_instance.previous_written_value = value;
+    }
   }
 
   pwmWrite(pin, value) {
