@@ -31,6 +31,21 @@ export class DigitalInput extends Peripheral {
   // Digital input is a peripheral that only does input reads
   constructor(config) {
     super(config);
+
+    this._value = LOW;
+  }
+
+  get value() {
+    return this._value;
+  }
+
+  read() {
+    // read in this context provides the latest value that's been set.
+    // so this should be coming off the message buffer.
+    if (!this.alive) {
+      throw new Error('Attempted to read on a destroyed peripheral');
+    }
+    return this.value;
   }
 }
 

@@ -18,6 +18,8 @@ const UNKNOWN_MODE = 99;
 const LOW = 0;
 const HIGH = 1;
 
+const DIGITAL_READ_MSEC = 20;
+
 const LED_PIN = 22;
 
 // Private symbols
@@ -31,11 +33,15 @@ const i2cDelay = Symbol('i2cDelay');
 const i2cRead = Symbol('i2cRead');
 const i2cCheckAlive = Symbol('i2cCheckAlive');
 const pinMode = Symbol('pinMode');
+const message_handler = Symbol('message_handler');
+const message_parser = Symbol('message_parser');
 
 const aikoModule = Symbol('aikoModule');
 // partially hide this so it can't be used to just randomly send messages
 const client = Symbol('client');
-const topic = Symbol('topic');
+const intopic = Symbol('Device inbound topic');
+const outtopic = Symbol('Device outbound topic');
+
 let log = console.info;
 
 export default class AikoIO extends EventEmitter {
@@ -170,11 +176,17 @@ export default class AikoIO extends EventEmitter {
           enumerable: true,
           value: transport.topic
         },
-        [topic]: {
+        [intopic]: {
           // this is used for internal purposes so it can keep
           // the housekeeping topics a little more tidy.
           enumerable: false,
           value: transport.topic + '/in'
+        },
+        [outtopic]: {
+          // this is used for internal purposes so we can keep topics a bit
+          // more tidy.
+          enumerable: false,
+          value: transport.topic + '/out'
         }
       });
     }
@@ -261,14 +273,33 @@ export default class AikoIO extends EventEmitter {
         });
 
         // TODO refactor this garbage out properly
-        this[client].on('message', function(t, msg) {
-          // message is Buffer
-          console.log(msg.toString())
-        });
+        this[client].on('message', this[message_handler].bind(this));
       }
     };
 
     this.init();
+  }
+
+  [message_handler](t, msg) {
+    // general handler for mqtt messages coming in
+    // message is Buffer
+
+    // check if the message is in our outbound
+    if (t === this[intopic]) {
+      // console.log('received an inbound message');
+    } else if (t === this[outtopic]) {
+      // console.log('received a message from the device');
+      console.log('This is a data payload coming back so we care about this');
+      console.log(msg.toString());
+      this[message_parser](msg.toString());
+    }
+  }
+
+  [message_parser](payload) {
+    // handles an aiko_io message and then sends it to the appropriate place
+    // to deal with. Aiko IO messages are simply S Expressions.
+
+
   }
 
   [getPinInstance](pin) {
@@ -290,7 +321,7 @@ export default class AikoIO extends EventEmitter {
     const config = {
       pin,
       client: this[client],
-      topic: this[topic]
+      topic: this[intopic]
     };
     let mode_name = 'unknown';
 
@@ -312,9 +343,10 @@ export default class AikoIO extends EventEmitter {
     // as the right type of peripheral.
     switch (mode) {
       case INPUT_MODE:
+        console.log('Creating input peripheral');
+        pin_instance.peripheral = new DigitalInput(config);
         break;
       case OUTPUT_MODE:
-        console.log('Creating output peripheral');
         pin_instance.peripheral = new DigitalOutput(config);
         break;
       case ANALOG_MODE:
@@ -328,9 +360,9 @@ export default class AikoIO extends EventEmitter {
 
     // create and publish the message to the client.
     const msg = `(nb:pin_mode ${pin} ${mode})`;
-    this[client].publish(this[topic], msg);
+    this[client].publish(this[intopic], msg);
 
-    log(`AikoIO, set pin ${pin} to mode ${mode} using ${this[topic]}:${msg}`);
+    log(`AikoIO, set pin ${pin} to mode ${mode} using ${this[intopic]}:${msg}`);
   }
 
   analogRead(pin) {
@@ -343,7 +375,32 @@ export default class AikoIO extends EventEmitter {
   }
 
   digitalRead(pin, handler) {
-    console.warn('Not implemented');
+    // send a message to trigger the pin Mode of the particular pin to
+    // DIGITAL READ
+    const pin_instance = this[getPinInstance](pin);
+
+    // boot the pin into digital input mode
+    if (pin_instance.mode != INPUT_MODE) {
+      this.pinMode(pin, INPUT_MODE);
+    }
+
+    // now set up an interval to provide the data back on a clock.
+    const reader = setInterval(() => {
+      let value;
+      if (pin_instance.mode == INPUT_MODE) {
+        value = pin_instance.peripheral.read();
+      } else {
+        value = pin_instance.previous_written_value;
+      }
+
+      if (value !== pin_instance.previous_read_value) {
+        pin_instance.previous_read_value = value;
+        if (handler) {
+          handler(value);
+        }
+        this.emit(`digital-read-${pin}`, value);
+      }
+    }, DIGITAL_READ_MSEC);
   }
 
   digitalWrite(pin, value) {
