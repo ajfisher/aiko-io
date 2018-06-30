@@ -5,6 +5,7 @@
 import { EventEmitter } from 'events';
 import { ESP32 } from './map.js';
 import { DigitalInput, DigitalOutput } from './peripheral.js';
+import { SExp } from './utils.js';
 import mqtt from 'mqtt';
 
 // Constants
@@ -299,7 +300,8 @@ export default class AikoIO extends EventEmitter {
     // handles an aiko_io message and then sends it to the appropriate place
     // to deal with. Aiko IO messages are simply S Expressions.
 
-
+    const s = new SExp();
+    s.parse(payload);
   }
 
   [getPinInstance](pin) {
