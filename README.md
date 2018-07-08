@@ -1,4 +1,7 @@
 # aiko-io
+
+[![Greenkeeper badge](https://badges.greenkeeper.io/ajfisher/aiko-io.svg)](https://greenkeeper.io/)
+
 Johnny Five IO plugin for Aiko Engine.
 
 ## Installation
