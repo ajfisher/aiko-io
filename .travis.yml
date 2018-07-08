@@ -17,3 +17,7 @@ install: npm install
 before_script: greenkeeper-lockfile-update
 # only v10 will upload the lockfile
 after_script: greenkeeper-lockfile-upload
+
+after_success:
+  - npm run coverage
+  - npm run report-coverage

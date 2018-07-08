@@ -10,11 +10,14 @@
   "scripts": {
     "build": "babel src -d dist --ignore *.test.js",
     "clean": "rm -rf dist",
+    "coverage": "jest src --coverage",
     "init": "mkdir dist",
     "j5": "babel-node examples/j5.js",
     "lint": "eslint src/**/*.js",
+    "report-coverage": "jest src --coverage --coverageReporters=text-lcov | coveralls",
     "test": "jest src",
     "prebuild": "npm run clean && npm run init",
+    "precoverage": "npm run build",
     "pretest": "npm run build",
     "prepublishOnly": "npm run lint && npm run build"
   },
