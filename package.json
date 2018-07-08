@@ -36,11 +36,11 @@
   "homepage": "https://github.com/ajfisher/aiko-io#readme",
   "devDependencies": {
     "babel-cli": "^6.26.0",
-    "babel-jest": "^22.4.3",
+    "babel-jest": "^23.2.0",
     "babel-preset-env": "^1.7.0",
     "coveralls": "^3.0.1",
-    "eslint": "^4.19.1",
-    "jest": "^22.4.3",
+    "eslint": "^5.0.1",
+    "jest": "^23.3.0",
     "johnny-five": "^0.15.0"
   },
   "dependencies": {
