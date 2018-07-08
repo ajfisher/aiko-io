@@ -4,7 +4,8 @@
   "description": "Johnny Five IO Plugin module for Aiko Engine for uPy",
   "main": "./dist/index.js",
   "files": [
-      "dist", "examples"
+    "dist",
+    "examples"
   ],
   "scripts": {
     "build": "babel src -d dist --ignore *.test.js",
@@ -15,7 +16,7 @@
     "test": "jest src",
     "prebuild": "npm run clean && npm run init",
     "pretest": "npm run build",
-    "prepublish": "npm run build"
+    "prepublishOnly": "npm run build"
   },
   "repository": {
     "type": "git",
