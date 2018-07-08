@@ -3,7 +3,7 @@
 export class SExp {
   // Simple S Expression Parser
   constructor(options) {
-    this.slist = [];
+    this.expression = [];
   }
 
   parse(data) {
@@ -66,7 +66,6 @@ export class SExp {
       }
     }
 
-    const list = process_exp(t);
-    console.log(list);
+    this.expression = process_exp(t);
   }
 }

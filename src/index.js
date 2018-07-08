@@ -302,6 +302,15 @@ export default class AikoIO extends EventEmitter {
 
     const s = new SExp();
     s.parse(payload);
+    console.log(s.expression);
+    switch (s.expression[0]) {
+      case 'nb:digital_read':
+        console.log('Digital read message');
+        break;
+      default:
+        console.log('No idea what it is: ', s.expression[0]);
+        break;
+    }
   }
 
   [getPinInstance](pin) {
