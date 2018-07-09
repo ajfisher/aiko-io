@@ -44,7 +44,8 @@ export class SExp {
 
         // check a boundary case to see if we've processed all of the tokens.
         if (typeof(tok) === 'undefined') {
-          return (exp.length > 1) ? exp : exp[0];
+          return exp[0];
+          // return (exp.length > 1) ? exp : exp[0];
         }
 
         if (tok === '(') {

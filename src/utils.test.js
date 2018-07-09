@@ -9,11 +9,19 @@ describe('The s-expression', () => {
   });
 });
 
+// do a basic example
+describe('Parse a single expression item', () => {
+  const s = new SExp();
+  s.parse('(test)');
+  test('returns the item without an array', () => {
+    expect(s.expression).toEqual('test');
+  });
+});
+
 // take a general example
 describe('Parsing an expression string', () => {
   const s = new SExp();
   s.parse('((data "quoted data" 123 4.5)\n(data (!@# (4.5) "(more" "data)")))');
-  console.log(s.expression);
   test('will work over multiple lines', () => {
     expect(s.expression.length).toEqual(2);
   });
@@ -48,3 +56,4 @@ describe('Parsing an expression string', () => {
     expect(s.expression[0][3]).toEqual(4.5);
   });
 });
+
