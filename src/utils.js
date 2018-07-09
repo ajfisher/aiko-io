@@ -61,7 +61,21 @@ export class SExp {
           return (exp.length > 1) ? exp : exp[0];
         } else {
           // an atom so just add it onto the current expression list.
-          exp.push(tok);
+          // do a quick bit of checking regarding type.
+          // check if it's an int
+          const i = parseInt(tok, 10);
+          // check if it's a float
+          const f = parseFloat(tok, 10);
+          // when doing a check on conversion, ensure that we cast backwards
+          // to ensure js hasn't coerced a number value.
+          if (! isNaN(i) && i.toString() === tok) {
+            exp.push(i);
+          } else if (! isNaN(f) && f.toString() === tok) {
+            exp.push(f);
+          } else {
+            // basically we're a string
+            exp.push(tok);
+          }
         }
       }
     }
