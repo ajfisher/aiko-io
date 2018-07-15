@@ -8,6 +8,14 @@ test('Constructor fails with no transport defined', () => {
   expect(() => { new AikoIO({}) }).toThrow(/transport/i);
 });
 
+test('Constructor fails if non MQTT transport provided', () => {
+  expect(() => {
+    new AikoIO({
+      transport: { type: 'serial'}
+    })
+  }).toThrow(/Only mqtt/i);
+});
+
 test('Constructor fails with no host', () => {
   expect(() => {
     new AikoIO({
