@@ -1,6 +1,5 @@
 import { SExp } from './utils.js';
 
-
 describe('The s-expression', () => {
   const s = new SExp();
 
@@ -13,8 +12,9 @@ describe('The s-expression', () => {
 describe('Parse a single expression item', () => {
   const s = new SExp();
   s.parse('(test)');
-  test('returns the item without an array', () => {
-    expect(s.expression).toEqual('test');
+  test('returns the item in an array', () => {
+    expect(s.expression.length).toEqual(1);
+    expect(s.expression[0]).toEqual('test');
   });
 });
 
@@ -54,6 +54,19 @@ describe('Parsing an expression string', () => {
 
   test('handles floats', () => {
     expect(s.expression[0][3]).toEqual(4.5);
+  });
+});
+
+// take a specific example
+describe('Parsing a nested array', () => {
+  const s = new SExp();
+  s.parse('(data ((123 4.5)))');
+  test('handles single element nested lists', () => {
+    expect(s.expression.length).toEqual(2);
+    expect(s.expression[1].length).toEqual(1);
+    expect(s.expression[1][0].length).toEqual(2);
+    expect(s.expression[1][0][0]).toEqual(123);
+    expect(s.expression[1][0][1]).toEqual(4.5);
   });
 });
 

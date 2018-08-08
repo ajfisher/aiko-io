@@ -59,7 +59,8 @@ export class SExp {
           // then return the finished expression.
           done = true;
           // do a boundary check as if exp has a length of one, return it only
-          return (exp.length > 1) ? exp : exp[0];
+          // return (exp.length > 1) ? exp : exp[0];
+          return (exp);
         } else {
           // an atom so just add it onto the current expression list.
           // do a quick bit of checking regarding type.
