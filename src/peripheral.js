@@ -33,6 +33,10 @@ export class DigitalInput extends Peripheral {
     super(config);
 
     this._value = LOW;
+
+    this.on(`digital-input-${this.pin}`, (value) => {
+      this._value = value;
+    });
   }
 
   get value() {

@@ -290,8 +290,6 @@ export default class AikoIO extends EventEmitter {
       // console.log('received an inbound message');
     } else if (t === this[outtopic]) {
       // console.log('received a message from the device');
-      console.log('This is a data payload coming back so we care about this');
-      console.log(msg.toString());
       this[message_parser](msg.toString());
     }
   }
@@ -302,10 +300,18 @@ export default class AikoIO extends EventEmitter {
 
     const s = new SExp();
     s.parse(payload);
-    console.log(s.expression);
     switch (s.expression[0]) {
-      case 'nb:digital_read':
-        console.log('Digital read message');
+      case 'nb:pin_value':
+        // go through each pair of items and do the appropriate callback for them
+        s.expression[1].forEach((pair, i) => {
+          const [pin, val] = pair;
+          const pin_instance = this[getPinInstance](pin);
+
+          if (pin_instance.peripheral !== null) {
+            pin_instance.peripheral.emit(`digital-input-${pin}`, val);
+          }
+        });
+
         break;
       default:
         console.log('No idea what it is: ', s.expression[0]);
@@ -368,6 +374,8 @@ export default class AikoIO extends EventEmitter {
       default:
         log(`Unkown mode ${mode}`);
     }
+
+    pin_instance.mode = mode;
 
     // create and publish the message to the client.
     const msg = `(nb:pin_mode ${pin} ${mode})`;
