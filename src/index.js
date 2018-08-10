@@ -308,7 +308,7 @@ export default class AikoIO extends EventEmitter {
           const pin_instance = this[getPinInstance](pin);
 
           if (pin_instance.peripheral !== null) {
-            pin_instance.peripheral.emit(`digital-input-${pin}`, val);
+            pin_instance.peripheral.emit(`${pin_instance.peripheral.type}-input-${pin}`, val);
           }
         });
 
