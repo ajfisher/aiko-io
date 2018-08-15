@@ -110,3 +110,33 @@ export class DigitalOutput extends Peripheral {
     // this.emit('change', this.value);
   }
 }
+
+export class PWMOutput extends Peripheral {
+  // PWM output is a peripheral that does PWM output writes
+  constructor(config) {
+    super(config);
+
+    this._value = LOW;
+  }
+
+  get value() {
+    return this._value;
+  }
+
+  write(value) {
+    if (!this.alive) {
+      throw new Error('Tried to write to destroyed peripheral');
+    }
+    if (value < 0 || value > 1023) {
+      throw new Error('PWM write values must be between 0-1023, provided: ' + val);
+    }
+    this._value = value;
+    const msg = `(nb:pwm ${this.pin} ${value})`;
+
+    this[mqtt_client].publish(this[mqtt_topic], msg);
+
+    console.log(`AikoIO, pwm write pin ${this.pin} to ${value} using ${this[mqtt_topic]}:${msg}`);
+    // TODO: Determine if this is absolutely necessary
+    // this.emit('change', this.value);
+  }
+}

@@ -2,7 +2,7 @@ import five from 'johnny-five';
 
 import AikoIO from '../src/index.js';
 
-const host = process.argv[2] || 'mqtt://iot.eclipse.org';
+const host = process.argv[2] || 'mqtt://iot.local';
 
 const board = five.Board({
   io: new AikoIO({
@@ -20,11 +20,24 @@ const board = five.Board({
 board.on('ready', () => {
   console.log('ready');
 
-  // const led = new five.Led({pin: 32});
-  // led.blink(2000);
-  //
+  const led = new five.Led({pin: 25});
+  led.off();
+  setTimeout(() => {
+    console.log('setting brightness');
+    led.brightness(128);
+    setTimeout(() => {
+      console.log('setting brightness');
+      led.brightness(255);
+      setTimeout(() => {
+        console.log('fading');
+        led.fade(0, 2000);
+      }, 5000);
+    }, 5000);
+  }, 5000);
+  /**
   const button = new five.Button({pin: 32});
   button.on('press', () => {console.log('press')});
   button.on('hold', () => {console.log('hold')});
   button.on('release', () => {console.log('release')});
+  **/
 });

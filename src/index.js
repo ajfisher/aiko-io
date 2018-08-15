@@ -4,7 +4,7 @@
 
 import { EventEmitter } from 'events';
 import { ESP32 } from './map.js';
-import { DigitalInput, DigitalOutput } from './peripheral.js';
+import { DigitalInput, DigitalOutput, PWMOutput } from './peripheral.js';
 import { SExp } from './utils.js';
 import mqtt from 'mqtt';
 
@@ -242,6 +242,7 @@ export default class AikoIO extends EventEmitter {
                 case INPUT_MODE:
                   return instance.peripheral.read();
                 case OUTPUT_MODE:
+                case PWM_MODE:
                   return instance.previous_written_value;
                 default:
                   return null;
@@ -360,14 +361,16 @@ export default class AikoIO extends EventEmitter {
     // as the right type of peripheral.
     switch (mode) {
       case INPUT_MODE:
-        console.log('Creating input peripheral');
         pin_instance.peripheral = new DigitalInput(config);
         break;
       case OUTPUT_MODE:
         pin_instance.peripheral = new DigitalOutput(config);
         break;
-      case ANALOG_MODE:
       case PWM_MODE:
+        console.log('Creating PWM peripheral');
+        pin_instance.peripheral = new PWMOutput(config);
+        break;
+      case ANALOG_MODE:
       case SERVO_MODE:
         log('no peripheral implemented');
         break;
@@ -389,8 +392,7 @@ export default class AikoIO extends EventEmitter {
   }
 
   analogWrite(pin, value) {
-    // this.pwmWrite(pin, value);
-    console.warn('Not implemented');
+    this.pwmWrite(pin, value);
   }
 
   digitalRead(pin, handler) {
@@ -434,7 +436,18 @@ export default class AikoIO extends EventEmitter {
   }
 
   pwmWrite(pin, value) {
-    console.warn('Not implemented');
+    // send a message over the transport to write the duty cycle to the pin
+
+    const pin_instance = this[getPinInstance](pin);
+
+    // J5 will send this as a value 0-255 and we need to remap this to a range
+    // that is 0 to 1023 for aiko / uPy
+    value = Math.round(value / 255 * 1023);
+
+    if (pin_instance.previous_written_value != value) {
+      pin_instance.peripheral.write(value);
+      pin_instance.previous_written_value = value;
+    }
   }
 }
 
