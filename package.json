@@ -47,6 +47,6 @@
     "johnny-five": "^0.15.0"
   },
   "dependencies": {
-    "mqtt": "^2.18.0"
+    "mqtt": "^3.0.0"
   }
 }
